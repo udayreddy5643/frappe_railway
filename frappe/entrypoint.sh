@@ -20,6 +20,7 @@ ln -s "$BENCH/assets" sites/assets
 
 wait-for-it -t 180 "$DB_HOST:$DB_PORT"
 redis_host="${REDIS_URL#*://}"
+redis_host="${redis_host##*@}"
 redis_host="${redis_host%%/*}"
 wait-for-it -t 180 "$redis_host"
 
@@ -38,12 +39,7 @@ runuser -u frappe -- bench set-config -gp socketio_port 9000
 runuser -u frappe -- bench set-config -g chromium_path /usr/bin/chromium-headless-shell
 
 if [ ! -f "sites/$SITE_NAME/site_config.json" ]; then
-  runuser -u frappe -- bench new-site "$SITE_NAME" \
-    --mariadb-user-host-login-scope='%' \
-    --admin-password "$ADMIN_PASSWORD" \
-    --db-root-username root \
-    --db-root-password "$DB_ROOT_PASSWORD" \
-    --no-mariadb-socket
+  runuser -u frappe -- bench new-site "$SITE_NAME"     --mariadb-user-host-login-scope='%'     --admin-password "$ADMIN_PASSWORD"     --db-root-username root     --db-root-password "$DB_ROOT_PASSWORD"     --no-mariadb-socket
 else
   runuser -u frappe -- bench --site "$SITE_NAME" migrate
 fi
